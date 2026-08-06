@@ -1,0 +1,81 @@
+---
+title: "Requests and Responses"
+description: "Request formats, parameters, and response structure."
+---
+
+## Endpoints
+
+AtlasFlux provides two main API endpoints:
+
+| Endpoint | Format | Use Case |
+|----------|--------|----------|
+| `POST /v1/responses` | AtlasFlux native | Recommended for new integrations |
+| `POST /v1/chat/completions` | OpenAI-compatible | Drop-in replacement for OpenAI SDK |
+
+## Request body
+
+Both endpoints accept similar parameters:
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `model` | string | Model identifier (default: `atlasflux/nenas-flash`) |
+| `input` / `messages` | string / array | Your prompt or message array |
+| `max_output_tokens` | integer | Maximum tokens to generate (1–32,000) |
+| `temperature` | float | Sampling temperature (0–2) |
+| `reasoning` | object | `{ effort: "low" | "medium" | "high" }` |
+| `web_search` | object | Web search configuration |
+| `stream` | boolean | Enable streaming response |
+
+## Response structure
+
+### Responses endpoint
+
+```json
+{
+  "id": "resp_arq_...",
+  "object": "response",
+  "output_text": "The response text...",
+  "usage": {
+    "input_tokens": 12,
+    "output_tokens": 48,
+    "reasoning_tokens": 0,
+    "cached_tokens": 0,
+    "total_tokens": 60,
+    "cost_myr": "0.00",
+    "latency_ms": 1234
+  },
+  "routing": {
+    "category": "general",
+    "upstream_model": "atlasflux/nenas-flash"
+  },
+  "citations": []
+}
+```
+
+### Chat Completions endpoint
+
+```json
+{
+  "id": "chatcmpl_arq_...",
+  "object": "chat.completion",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "The response text..."
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 12,
+    "completion_tokens": 48,
+    "total_tokens": 60
+  }
+}
+```
+
+## Cost display
+
+All costs are returned as strings in MYR (Malaysian Ringgit). The `cost_myr` field shows the total cost for the request.

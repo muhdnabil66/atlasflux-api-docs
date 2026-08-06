@@ -1,0 +1,52 @@
+---
+title: "API Keys"
+description: "Creating and managing AtlasFlux API keys."
+---
+
+## API key format
+
+AtlasFlux API keys follow this format:
+
+```
+af_{environment}_{32 hex characters}
+```
+
+Examples:
+- `af_live_a1b2c3d4e5f6...` — Production key
+- `af_test_a1b2c3d4e5f6...` — Development key
+
+The first 14 characters serve as the **prefix** and are stored in the database for lookup. The full key is only shown once at creation.
+
+## Creating keys
+
+Create API keys from the [Developer Dashboard](https://platform.atlasflux.my/dashboard/api-keys):
+
+1. Click **Create API key**
+2. Enter a name
+3. Select environment (test or live)
+4. Optionally set a monthly spend limit
+5. Copy the full key — **it will not be shown again**
+
+## Key prefixes
+
+The prefix is visible in the Dashboard and in request logs:
+
+| Prefix | Full Format |
+|--------|------------|
+| `af_live_` + 6 hex | Production key prefix |
+| `af_test_` + 6 hex | Development key prefix |
+
+## Key management
+
+- **View** — See all keys in the Dashboard (prefix only, not full key)
+- **Rename** — Change the key name
+- **Revoke** — Immediately invalidate a key
+- **Delete** — Permanently remove a key
+
+<Warning>
+Deleted keys cannot be recovered. Revoke instead if you might need the key again later.
+</Warning>
+
+## Spending limits
+
+You can set a monthly spend limit per key. When the limit is reached, requests using that key receive a `402` response.

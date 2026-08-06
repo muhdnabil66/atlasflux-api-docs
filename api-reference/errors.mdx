@@ -1,0 +1,67 @@
+---
+title: "Errors Reference"
+description: "Complete catalog of error codes and responses."
+---
+
+## Error response format
+
+```json
+{
+  "error": {
+    "message": "Human-readable error message",
+    "type": "error_category",
+    "code": "specific_error_code",
+    "param": "field_name_or_null",
+    "request_id": "req_abc123"
+  }
+}
+```
+
+## Error codes
+
+### Authentication Errors (401)
+
+| Code | HTTP | Message | Cause |
+|------|------|---------|-------|
+| `authentication_error` | 401 | Missing Authorization header | No Bearer token provided |
+| `authentication_error` | 401 | Malformed Authorization header | Invalid header format |
+| `authentication_error` | 401 | Invalid or expired Clerk token | Dashboard auth failed |
+| `invalid_api_key` | 401 | API key not found | Wrong key or typo |
+| `expired_api_key` | 401 | API key expired | Key past expiration date |
+| `revoked_api_key` | 403 | API key revoked | Key was manually revoked |
+
+### Billing Errors (402)
+
+| Code | HTTP | Message | Cause |
+|------|------|---------|-------|
+| `insufficient_balance` | 402 | Insufficient balance | Wallet balance too low |
+| `spend_limit_exceeded` | 402 | Monthly spend limit exceeded | Per-key limit reached |
+
+### Request Errors (400)
+
+| Code | HTTP | Message | Cause |
+|------|------|---------|-------|
+| `invalid_request` | 400 | Validation error | Request body doesn't match schema |
+| `context_length_exceeded` | 400 | Context too long | Input exceeds model's context window |
+| `unsupported_input` | 400 | Unsupported content type | Image/document not supported by model |
+
+### Rate Limit (429)
+
+| Code | HTTP | Message | Cause |
+|------|------|---------|-------|
+| `rate_limit_exceeded` | 429 | Rate limit exceeded | Too many requests per minute |
+
+### Server Errors (500+)
+
+| Code | HTTP | Message | Cause |
+|------|------|---------|-------|
+| `provider_unavailable` | 503 | All models failed | All model attempts failed |
+| `provider_timeout` | 504 | Model timed out | Model took too long |
+| `search_error` | 502 | Search failed | Search provider error |
+| `internal_error` | 500 | Internal server error | Unexpected error |
+
+### Conflict (409)
+
+| Code | HTTP | Message | Cause |
+|------|------|---------|-------|
+| `idempotency_conflict` | 409 | Different payload for same key | Idempotency key reused with different body |

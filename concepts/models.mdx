@@ -1,0 +1,75 @@
+---
+title: "Models"
+description: "Available models, capabilities, and intelligent routing."
+---
+
+## Public model
+
+AtlasFlux exposes a single model identifier:
+
+```
+atlasflux/nenas-flash
+```
+
+You do not need to specify model names. AtlasFlux automatically routes each request to the best model.
+
+## Model capabilities
+
+| Capability | Supported |
+|-----------|-----------|
+| Text generation | Yes |
+| Vision (images) | Yes |
+| Reasoning | Yes |
+| Web search | Yes |
+| Streaming | Yes |
+| Tool calling | Yes |
+| Structured output (JSON) | Yes |
+| Context window | 1,000,000 tokens |
+| Max output | 32,000 tokens |
+
+## Intelligent routing
+
+When you send a request, AtlasFlux evaluates:
+
+1. **Task type** — Code, analysis, creative writing, etc.
+2. **Complexity** — Simple questions vs. multi-step reasoning
+3. **Input features** — Images, tools, structured output requirements
+4. **Reasoning effort** — Whether reasoning mode is requested
+
+Based on this, the router selects the optimal model from its internal model pool.
+
+## Routing categories
+
+| Category | Description |
+|----------|------------|
+| `general` | Standard text tasks, Q&A, summarization |
+| `multimodal` | Tasks involving images or audio |
+| `reasoning` | Complex analysis, math, multi-step problems |
+| `structured` | JSON schema, function calling, structured output |
+| `classifier` | Simple classification and categorization tasks |
+
+## Model response
+
+The response includes routing metadata:
+
+```json
+{
+  "routing": {
+    "category": "general",
+    "upstream_model": "atlasflux/nenas-flash",
+    "reasoning": "Selected for general text generation"
+  }
+}
+```
+
+## Pricing
+
+All models use the same AtlasFlux pricing:
+
+| Token Type | Rate per 1M tokens |
+|-----------|-------------------|
+| Input | RM 5.00 |
+| Output | RM 25.00 |
+| Reasoning | RM 25.00 |
+
+Prices are in MYR and deducted from your prepaid wallet balance.

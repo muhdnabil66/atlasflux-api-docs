@@ -1,0 +1,35 @@
+---
+title: "Production Checklist"
+description: "Before going live with AtlasFlux API."
+---
+
+## Checklist
+
+### Authentication
+- [ ] API keys stored as environment variables (never hardcoded)
+- [ ] Server-side only — no API keys in browser or client code
+- [ ] Separate test and live keys configured
+- [ ] Key rotation plan in place
+
+### Billing
+- [ ] Wallet funded with sufficient balance
+- [ ] Monthly spend limits set per key if needed
+- [ ] Usage monitoring configured in Dashboard
+- [ ] Alert thresholds for low balance
+
+### Error handling
+- [ ] Retry logic with exponential backoff for 429/500/503
+- [ ] Rate limit headers respected
+- [ ] Idempotency keys used for non-streaming requests
+- [ ] Graceful degradation when model is unavailable
+
+### Security
+- [ ] HTTPS only for all API calls
+- [ ] API keys never logged in plaintext
+- [ ] Server-side request handling only
+- [ ] Webhook signature verification enabled (if using Stripe)
+
+### Monitoring
+- [ ] Dashboard checked regularly for usage and balance
+- [ ] Request logs reviewed for errors
+- [ ] Cost tracking and alerts configured

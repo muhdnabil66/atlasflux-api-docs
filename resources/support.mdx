@@ -1,0 +1,33 @@
+---
+title: "Support"
+description: "How to get help with the AtlasFlux API."
+---
+
+## Getting help
+
+- **Documentation** — You're reading it
+- **Dashboard** — [platform.atlasflux.my](https://platform.atlasflux.my) for account, billing, and API key management
+- **Status** — [status.atlasflux.my](https://status.atlasflux.my) for service status
+
+## Reporting issues
+
+For API issues, include:
+
+1. Request ID (from the response `request_id` field)
+2. Timestamp of the request
+3. Error code and message
+4. Steps to reproduce
+
+## Common questions
+
+**Q: How do I check my wallet balance?**
+A: Use the [Dashboard Overview](https://platform.atlasflux.my/dashboard/overview) or call `GET /dashboard/billing/balance`.
+
+**Q: How do I add credit?**
+A: Use the [Billing Dashboard](https://platform.atlasflux.my/dashboard/billing) to top up via Stripe.
+
+**Q: Can I get a refund?**
+A: Contact support through the Dashboard.
+
+**Q: What happens if my balance runs out?**
+A: Requests return `402 Insufficient Balance`. Top up to continue.

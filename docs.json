@@ -1,0 +1,96 @@
+{
+  "$schema": "https://mintlify.com/schema.json",
+  "name": "AtlasFlux API",
+  "description": "Unified AI model routing API. One endpoint, intelligent routing, web search, and prepaid MYR billing.",
+  "theme": "mint",
+  "favicon": "/favicon.svg",
+  "logo": {
+    "light": "/logo-light.svg",
+    "dark": "/logo-dark.svg"
+  },
+  "colors": {
+    "primary": "#7C3AED",
+    "light": "#A78BFA",
+    "dark": "#5B21B6"
+  },
+  "topbarLinks": [],
+  "topbarCta": {
+    "type": "link",
+    "label": "Platform",
+    "url": "https://platform.atlasflux.my"
+  },
+  "navbarLinks": [
+    {
+      "type": "link",
+      "label": "Platform",
+      "url": "https://platform.atlasflux.my"
+    },
+    {
+      "type": "link",
+      "label": "Status",
+      "url": "https://status.atlasflux.my"
+    }
+  ],
+  "footerSocials": {
+    "github": "https://github.com/atlasflux",
+    "twitter": "https://twitter.com/atlasfluxai"
+  },
+  "tabs": [],
+  "search": {
+    "prompt": "Search AtlasFlux API docs..."
+  },
+  "navigation": {
+    "pages": [
+      "introduction",
+      "quickstart",
+      {
+        "group": "Core Concepts",
+        "pages": [
+          "concepts/overview",
+          "concepts/api-keys",
+          "concepts/models",
+          "concepts/requests-and-responses",
+          "concepts/streaming",
+          "concepts/usage-and-billing",
+          "concepts/rate-limits"
+        ]
+      },
+      "authentication",
+      {
+        "group": "Guides",
+        "pages": [
+          "guides/first-request",
+          "guides/text-generation",
+          "guides/streaming-responses",
+          "guides/handling-errors",
+          "guides/production-checklist"
+        ]
+      },
+      {
+        "group": "API Reference",
+        "pages": [
+          "api-reference/overview",
+          "api-reference/authentication",
+          "api-reference/errors",
+          "api-reference/changelog"
+        ]
+      },
+      {
+        "group": "Resources",
+        "pages": [
+          "resources/errors",
+          "resources/security",
+          "resources/support"
+        ]
+      }
+    ]
+  },
+  "api": {
+    "baseUrl": "https://api.atlasflux.my",
+    "auth": {
+      "type": "bearer",
+      "description": "Use your AtlasFlux API key in the Authorization header."
+    }
+  },
+  "openapi": "openapi.json"
+}

@@ -1,0 +1,91 @@
+---
+title: "Authentication"
+description: "How to authenticate requests to the AtlasFlux API."
+---
+
+## API Key Authentication
+
+All `/v1/*` API requests require an AtlasFlux API key in the `Authorization` header.
+
+### Header format
+
+```
+Authorization: Bearer af_live_<key>
+```
+
+or for test keys:
+
+```
+Authorization: Bearer af_test_<key>
+```
+
+### Key types
+
+| Prefix | Environment | Use Case |
+|--------|------------|----------|
+| `af_live_` | Production | Live requests that consume wallet balance |
+| `af_test_` | Development | Testing and prototyping |
+
+### Creating an API key
+
+1. Go to [Dashboard → API Keys](https://platform.atlasflux.my/dashboard/api-keys)
+2. Click **Create API key**
+3. Choose environment (test or live)
+4. Copy the key immediately — it will not be shown again
+
+### Storing your key
+
+Always store your API key as an environment variable. Never hardcode it in source code or expose it in browser/client-side code.
+
+```bash
+export ATLASFLUX_API_KEY="af_live_YOUR_KEY_HERE"
+```
+
+In your application:
+
+```javascript
+// Server-side only
+const apiKey = process.env.ATLASFLUX_API_KEY;
+```
+
+<Warning>
+Never expose your API key in browser JavaScript, mobile apps, or client-side code. API keys grant access to your wallet balance. Use them only in server-side environments.
+</Warning>
+
+### Key rotation
+
+If your key is compromised:
+
+1. Go to [Dashboard → API Keys](https://platform.atlasflux.my/dashboard/api-keys)
+2. Delete or revoke the compromised key
+3. Create a new key
+4. Update your application with the new key
+
+### Revoked or invalid keys
+
+Requests with revoked, expired, or invalid keys receive a `401 Unauthorized` response:
+
+```json
+{
+  "error": {
+    "message": "Invalid or missing API key.",
+    "type": "authentication_error",
+    "code": "invalid_api_key"
+  }
+}
+```
+
+### Rate limits
+
+API keys have rate limits based on environment:
+
+| Environment | Limit |
+|------------|-------|
+| Test (`af_test_`) | 20 requests/minute |
+| Live (`af_live_`) | 60 requests/minute |
+
+Rate limit headers are included in every response:
+
+- `x-ratelimit-limit` — Maximum requests per window
+- `x-ratelimit-remaining` — Remaining requests
+- `x-ratelimit-reset` — Unix timestamp when the window resets

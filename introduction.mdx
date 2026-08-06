@@ -1,0 +1,37 @@
+---
+title: "AtlasFlux API"
+description: "Unified AI model routing API. One endpoint, intelligent routing, web search, and prepaid MYR billing."
+---
+
+## What is the AtlasFlux API?
+
+AtlasFlux API is a unified AI model routing service. Instead of integrating with multiple providers directly, you send requests to one endpoint and AtlasFlux handles model selection, routing, fallback, and billing.
+
+## Key Features
+
+- **Single model endpoint** — Use `atlasflux/nenas-flash` for all tasks
+- **Intelligent routing** — Requests are automatically routed to the best model for the task
+- **Web search** — Built-in web search with multiple depth tiers
+- **Reasoning mode** — Adjustable reasoning effort (low, medium, high)
+- **Streaming** — Token-by-token streaming for both Responses and Chat Completions
+- **Prepaid MYR billing** — Pay-as-you-go with a prepaid wallet balance
+- **OpenAI-compatible** — Drop-in replacement for OpenAI SDK and tools
+
+## Base URL
+
+```
+https://api.atlasflux.my
+```
+
+## Before You Start
+
+1. Create a [Developer Account](https://platform.atlasflux.my)
+2. Create an API key from the Dashboard
+3. Add prepaid credit to your wallet
+
+## Quick Links
+
+- [Quickstart](/quickstart) — Make your first API call in 2 minutes
+- [Authentication](/authentication) — How to authenticate requests
+- [API Reference](/api-reference/overview) — Full endpoint reference
+- [Models](/concepts/models) — Available models and capabilities

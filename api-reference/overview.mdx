@@ -1,0 +1,66 @@
+---
+title: "API Reference"
+description: "Complete reference for all AtlasFlux API endpoints."
+---
+
+## Base URL
+
+```
+https://api.atlasflux.my
+```
+
+## Authentication
+
+All `/v1/*` requests require:
+
+```
+Authorization: Bearer af_live_<key> | af_test_<key>
+```
+
+## Endpoints
+
+### Developer API (`/v1/*`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/v1/responses` | Create a response (native format) |
+| `POST` | `/v1/chat/completions` | Create a chat completion (OpenAI-compatible) |
+| `GET` | `/v1/models` | List available models |
+| `GET` | `/v1/models/:model` | Get model details |
+
+### Dashboard API (`/dashboard/*`)
+
+Requires Clerk session authentication (for the web dashboard).
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/dashboard/overview` | Overview data |
+| `GET` | `/dashboard/usage` | Usage time series |
+| `GET` | `/dashboard/logs` | Request logs |
+| `GET` | `/dashboard/api-keys` | List API keys |
+| `POST` | `/dashboard/api-keys` | Create API key |
+| `DELETE` | `/dashboard/api-keys/:id` | Delete API key |
+| `GET` | `/dashboard/billing/balance` | Wallet balance |
+| `GET` | `/dashboard/billing/transactions` | Transaction history |
+| `POST` | `/dashboard/billing/checkout` | Create Stripe checkout |
+
+### Webhook (`/billing/*`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/billing/stripe/webhook` | Stripe webhook receiver |
+
+### Health (`/health`, `/ready`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/health` | Health check |
+| `GET` | `/ready` | Readiness check |
+
+## OpenAPI
+
+Full interactive API reference with playground is available from the OpenAPI specification:
+
+<Card title="OpenAPI Specification" icon="code" href="/openapi.json">
+  Download or view the full OpenAPI 3.0.3 spec.
+</Card>

@@ -1,0 +1,63 @@
+---
+title: "Error Catalog"
+description: "Quick reference for all error codes and how to resolve them."
+---
+
+## Error format
+
+```json
+{
+  "error": {
+    "message": "Human-readable description",
+    "type": "error_category",
+    "code": "specific_code",
+    "param": null,
+    "request_id": "req_abc123"
+  }
+}
+```
+
+## Quick resolution guide
+
+<AccordionGroup>
+
+<Accordion title="401 — Authentication errors">
+
+| Error | Resolution |
+|-------|-----------|
+| `invalid_api_key` | Check your API key format: `af_live_...` or `af_test_...` |
+| `expired_api_key` | Create a new key in the Dashboard |
+| `revoked_api_key` | Key was revoked. Create a new one. |
+| Missing header | Add `Authorization: Bearer <key>` header |
+
+</Accordion>
+
+<Accordion title="402 — Billing errors">
+
+| Error | Resolution |
+|-------|-----------|
+| `insufficient_balance` | Top up your wallet in the Dashboard |
+| `spend_limit_exceeded` | Increase or remove your key's monthly spend limit |
+
+</Accordion>
+
+<Accordion title="429 — Rate limit">
+
+| Error | Resolution |
+|-------|-----------|
+| `rate_limit_exceeded` | Wait for `x-ratelimit-reset` header value, then retry |
+
+</Accordion>
+
+<Accordion title="500+ — Server errors">
+
+| Error | Resolution |
+|-------|-----------|
+| `provider_unavailable` | Retry with backoff. If persistent, contact support. |
+| `provider_timeout` | Retry with backoff. Consider increasing `max_output_tokens`. |
+| `search_error` | Retry or disable web search for this request. |
+| `internal_error` | Retry with exponential backoff. |
+
+</Accordion>
+
+</AccordionGroup>

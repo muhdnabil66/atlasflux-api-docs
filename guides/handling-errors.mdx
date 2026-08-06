@@ -1,0 +1,73 @@
+---
+title: "Handling Errors"
+description: "Error handling patterns and common error codes."
+---
+
+## Error response format
+
+All errors follow a consistent format:
+
+```json
+{
+  "error": {
+    "message": "Description of what went wrong",
+    "type": "error_type",
+    "code": "specific_error_code",
+    "param": null,
+    "request_id": "req_..."
+  }
+}
+```
+
+## Common errors
+
+| HTTP Status | Code | Cause | Solution |
+|------------|------|-------|----------|
+| 400 | `invalid_request` | Malformed request body | Check request schema |
+| 400 | `context_length_exceeded` | Input too long for model | Reduce input or increase `max_output_tokens` |
+| 401 | `invalid_api_key` | Missing or invalid API key | Check your key and header format |
+| 401 | `expired_api_key` | Key has expired | Create a new key |
+| 402 | `insufficient_balance` | Wallet balance too low | Top up your wallet |
+| 402 | `spend_limit_exceeded` | Monthly key limit reached | Increase limit or wait |
+| 403 | `revoked_api_key` | Key has been revoked | Create a new key |
+| 429 | `rate_limit_exceeded` | Too many requests | Wait and retry |
+| 500 | `internal_error` | Server error | Retry with backoff |
+| 503 | `provider_unavailable` | All models failed | Retry later |
+| 504 | `provider_timeout` | Provider took too long | Retry with backoff |
+
+## Error handling pattern
+
+```javascript
+async function callAtlasFlux(input) {
+  try {
+    const res = await fetch("https://api.atlasflux.my/v1/responses", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.ATLASFLUX_API_KEY}`,
+      },
+      body: JSON.stringify({ input }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      console.error(`Error ${res.status}: ${err.error.message}`);
+
+      if (res.status === 429) {
+        // Rate limited — wait and retry
+        const reset = res.headers.get("x-ratelimit-reset");
+        const waitMs = (Number(reset) * 1000) - Date.now();
+        if (waitMs > 0) await new Promise(r => setTimeout(r, waitMs));
+        return callAtlasFlux(input);
+      }
+
+      throw new Error(err.error.message);
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error("Request failed:", error.message);
+    throw error;
+  }
+}
+```

@@ -1,0 +1,12 @@
+{
+  "name": "atlasflux-api-docs",
+  "version": "1.0.0",
+  "description": "Mintlify documentation for AtlasFlux API",
+  "scripts": {
+    "dev": "mintlify dev",
+    "validate": "mintlify validate"
+  },
+  "devDependencies": {
+    "mintlify": "latest"
+  }
+}

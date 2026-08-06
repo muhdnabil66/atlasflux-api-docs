@@ -1,0 +1,72 @@
+---
+title: "First Request"
+description: "Step-by-step guide to making your first API request."
+---
+
+## Step 1: Get your API key
+
+1. Go to [platform.atlasflux.my](https://platform.atlasflux.my)
+2. Sign in with your developer account
+3. Navigate to **API Keys**
+4. Click **Create API key**
+5. Choose **Development** environment
+6. Copy the key and save it securely
+
+## Step 2: Set up your environment
+
+```bash
+export ATLASFLUX_API_KEY="af_test_YOUR_KEY_HERE"
+```
+
+## Step 3: Send a request
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.atlasflux.my/v1/responses \
+  -H "Authorization: Bearer $ATLASFLUX_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"input": "Hello, what can you do?"}'
+```
+
+```javascript JavaScript
+const res = await fetch("https://api.atlasflux.my/v1/responses", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${process.env.ATLASFLUX_API_KEY}`,
+  },
+  body: JSON.stringify({ input: "Hello, what can you do?" }),
+});
+const data = await res.json();
+console.log(data.output_text);
+```
+
+```python Python
+import requests, os
+r = requests.post(
+    "https://api.atlasflux.my/v1/responses",
+    headers={"Authorization": f"Bearer {os.environ['ATLASFLUX_API_KEY']}"},
+    json={"input": "Hello, what can you do?"},
+)
+print(r.json()["output_text"])
+```
+
+</CodeGroup>
+
+## Step 4: Check the response
+
+```json
+{
+  "output_text": "I'm AtlasFlux Nenas Flash, an AI assistant...",
+  "usage": {
+    "input_tokens": 8,
+    "output_tokens": 24,
+    "cost_myr": "0.00"
+  }
+}
+```
+
+## Step 5: Monitor usage
+
+Go to [Dashboard → Overview](https://platform.atlasflux.my/dashboard/overview) to see your request count, token usage, and wallet balance.

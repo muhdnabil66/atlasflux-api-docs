@@ -1,0 +1,47 @@
+---
+title: "Overview"
+description: "How the AtlasFlux API works under the hood."
+---
+
+## Architecture
+
+AtlasFlux acts as a unified gateway between your application and AI models.
+
+```
+Your App → AtlasFlux API → Intelligent Router → Model
+```
+
+1. You send a request to `https://api.atlasflux.my`
+2. AtlasFlux classifies the request type and complexity
+3. The router selects the optimal upstream model
+4. The request is forwarded to the provider
+5. The response is normalized and returned to you
+
+## What AtlasFlux handles
+
+- **Model selection** — Automatically picks the best model for your task
+- **Fallback** — If a model fails, the request is retried with another model
+- **Pricing** — Unified pricing across all models in MYR
+- **Web search** — Built-in web search with configurable depth
+- **Usage tracking** — Every request is logged with token counts and cost
+- **Wallet billing** — Prepaid balance deducted per request
+
+## Public model
+
+All users access a single model identifier:
+
+```
+atlasflux/nenas-flash
+```
+
+You do not need to specify model names. AtlasFlux handles routing internally.
+
+## Request flow
+
+1. **Authentication** — Verify your API key
+2. **Validation** — Validate request body and parameters
+3. **Reservation** — Reserve estimated cost from your wallet
+4. **Routing** — Classify request and select model
+5. **Execution** — Request is processed by the selected model
+6. **Settlement** — Deduct actual cost and release unused reservation
+7. **Response** — Return normalized response with usage data

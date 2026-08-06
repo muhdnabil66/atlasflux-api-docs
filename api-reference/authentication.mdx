@@ -1,0 +1,55 @@
+---
+title: "Authentication Reference"
+description: "Detailed authentication reference for all API endpoints."
+---
+
+## Three authentication methods
+
+AtlasFlux uses three distinct authentication methods depending on the endpoint category.
+
+### 1. API Key Auth — Public Developer API
+
+**Used for:** `/v1/*` endpoints
+
+```
+Authorization: Bearer af_live_<32hex> | af_test_<32hex>
+```
+
+- Keys are prefixed with `af_live_` or `af_test_`
+- Verified by hashing the key and looking up by prefix
+- Sets `developer`, `apiKeyAuth`, and `apiKey` context
+
+### 2. Clerk Auth — Dashboard API
+
+**Used for:** `/dashboard/*` and `/billing/checkout` endpoints
+
+```
+Authorization: Bearer <Clerk JWT>
+```
+
+- JWT tokens issued by Clerk
+- Auto-provisions developer account on first login
+- Creates wallet automatically
+
+### 3. Internal Token Auth — Admin/Internal API
+
+**Used for:** `/internal/*` endpoints
+
+```
+X-Internal-Token: <INTERNAL_API_KEY>
+```
+
+- Token-based, not bearer
+- Disabled in production unless configured
+- Used for admin operations
+
+## Request context
+
+Each authenticated request has the following context:
+
+| Context Field | Source | Available On |
+|--------------|--------|-------------|
+| `request.developer` | Database record | All authenticated routes |
+| `request.apiKeyAuth` | API key verification | `/v1/*` routes |
+| `request.apiKey` | API key record | `/v1/*` routes |
+| `request.clerk` | Clerk JWT claims | `/dashboard/*` routes |

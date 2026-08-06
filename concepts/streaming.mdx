@@ -1,0 +1,49 @@
+---
+title: "Streaming"
+description: "Token-by-token streaming for real-time responses."
+---
+
+## Overview
+
+AtlasFlux supports streaming for both `/v1/responses` and `/v1/chat/completions`. Enable streaming by setting `"stream": true` in your request body.
+
+## How streaming works
+
+When streaming is enabled, the API returns a `text/event-stream` response with Server-Sent Events (SSE). Tokens are delivered incrementally as they are generated.
+
+## Chat Completions streaming
+
+Uses OpenAI-compatible SSE format:
+
+```
+data: {"id":"chatcmpl_...","object":"chat.completion.chunk","choices":[{"delta":{"content":"Hello"}}]}
+data: {"id":"chatcmpl_...","object":"chat.completion.chunk","choices":[{"delta":{"content":" world"}}]}
+data: {"id":"chatcmpl_...","object":"chat.completion.chunk","choices":[],"usage":{"prompt_tokens":12,"completion_tokens":2}}
+data: [DONE]
+```
+
+## Responses streaming
+
+Uses AtlasFlux-specific event types:
+
+```
+event: response.created
+data: {"request_id":"arq_..."}
+
+event: response.output_text.delta
+data: {"delta":"The response text..."}
+
+event: response.usage
+data: {"inputTokens":12,"outputTokens":48,"costMicroMyr":50000}
+
+event: response.completed
+data: {}
+```
+
+## Implementation tips
+
+- Parse SSE events line by line
+- Handle `event:` and `data:` fields separately
+- Accumulate text deltas for the full response
+- Handle connection drops gracefully with retry logic
+- The final event contains usage and cost information

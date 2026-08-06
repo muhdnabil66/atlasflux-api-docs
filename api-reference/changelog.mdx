@@ -1,0 +1,22 @@
+---
+title: "Changelog"
+description: "API version history and changes."
+---
+
+## v1.0.0 — 2026-08-06
+
+### Initial release
+
+- `/v1/responses` — Native response endpoint with web search, reasoning, and streaming
+- `/v1/chat/completions` — OpenAI-compatible chat completions endpoint
+- `/v1/models` — Model listing endpoint
+- Prepaid wallet billing in MYR
+- Intelligent model routing with fallback
+- Web search with 5 depth tiers
+- Reasoning mode (low, medium, high)
+- Dashboard API for key management, usage, billing, and logs
+- Stripe checkout for wallet top-ups
+- Rate limiting (20/min test, 60/min live)
+- Idempotency keys for non-streaming requests
+- Request logging with token breakdown and cost
+- Cached token tracking

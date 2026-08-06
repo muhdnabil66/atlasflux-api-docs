@@ -1,0 +1,50 @@
+---
+title: "Security"
+description: "Security best practices for using the AtlasFlux API."
+---
+
+## API key security
+
+### Never expose keys client-side
+
+API keys grant access to your wallet balance. Never include them in:
+
+- Browser JavaScript
+- Mobile application code
+- Public repositories
+- Client-side network requests
+
+### Use environment variables
+
+Store keys as environment variables:
+
+```bash
+export ATLASFLUX_API_KEY="af_live_..."
+```
+
+Never hardcode keys in source code.
+
+### Rotate compromised keys
+
+If a key is compromised:
+
+1. Revoke it immediately in the [Dashboard](https://platform.atlasflux.my/dashboard/api-keys)
+2. Create a new key
+3. Update all applications using the old key
+4. Review usage logs for unauthorized activity
+
+### HTTPS only
+
+All API requests must use HTTPS. HTTP requests are not accepted.
+
+### Logging
+
+When logging API requests, redact API keys and sensitive data. Never log full API keys in plaintext.
+
+### Webhook security
+
+Stripe webhooks are verified using the `stripe-signature` header. Ensure `STRIPE_WEBHOOK_SECRET` is configured correctly.
+
+### Reporting
+
+Report security issues to the AtlasFlux team through the [support channel](/resources/support).
