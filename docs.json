@@ -3,15 +3,18 @@
   "name": "AtlasFlux API",
   "description": "Unified AI model routing API. One endpoint, intelligent routing, web search, and prepaid MYR billing.",
   "theme": "mint",
-  "favicon": "/favicon.svg",
+  "favicon": {
+    "light": "/favicon.svg",
+    "dark": "/images/atlas.png"
+  },
   "logo": {
-    "light": "/logo-light.svg",
-    "dark": "/logo-dark.svg"
+    "light": "/images/atlas.png",
+    "dark": "/images/atlas.png"
   },
   "colors": {
-    "primary": "#7C3AED",
-    "light": "#A78BFA",
-    "dark": "#5B21B6"
+    "primary": "#FF3333",
+    "light": "#e3a3a3",
+    "dark": "#FFB000"
   },
   "topbarLinks": [],
   "topbarCta": {
@@ -85,12 +88,14 @@
       }
     ]
   },
-  "api": {
-    "baseUrl": "https://api.atlasflux.my",
-    "auth": {
-      "type": "bearer",
-      "description": "Use your AtlasFlux API key in the Authorization header."
-    }
+  "openapi": "openapi.json",
+  "icons": {
+    "library": "fontawesome"
   },
-  "openapi": "openapi.json"
+  "navbar": {
+    "links": []
+  },
+  "styling": {
+    "latex": false
+  }
 }
