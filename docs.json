@@ -97,5 +97,14 @@
   },
   "styling": {
     "latex": false
+  },
+  "contextual": {
+    "options": [
+      "copy",
+      "view",
+      "chatgpt",
+      "claude"
+    ],
+    "display": "header"
   }
 }
