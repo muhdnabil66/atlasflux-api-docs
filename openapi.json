@@ -383,7 +383,7 @@
       "get": {
         "operationId": "getLogs",
         "summary": "Get request logs",
-        "description": "Returns paginated request logs with optional filters.",
+        "description": "Returns paginated request logs with optional filters. Costs use integer micro-MYR values; failed requests have zero cost, and cachedTokens is provider-reported usage.",
         "tags": ["Dashboard — Logs"],
         "security": [{ "clerkAuth": [] }],
         "parameters": [
@@ -574,9 +574,9 @@
           "input_tokens": { "type": "integer" },
           "output_tokens": { "type": "integer" },
           "reasoning_tokens": { "type": "integer" },
-          "cached_tokens": { "type": "integer" },
+          "cached_tokens": { "type": "integer", "description": "Cached input tokens reported by the model provider. Included in total input usage and billed at the standard input-token rate." },
           "total_tokens": { "type": "integer" },
-          "cost_myr": { "type": "string", "description": "Total cost in MYR as a string." },
+          "cost_myr": { "type": "string", "pattern": "^[0-9]+\\.[0-9]{6}$", "example": "0.000431", "description": "Settled request cost in MYR with six decimal places. Failed requests are recorded with zero cost." },
           "latency_ms": { "type": "integer" }
         }
       },
@@ -776,9 +776,10 @@
           "inputTokens": { "type": "integer" },
           "outputTokens": { "type": "integer" },
           "reasoningTokens": { "type": "integer" },
-          "cachedTokens": { "type": "integer" },
+          "cachedTokens": { "type": "integer", "description": "Cached input tokens reported by the model provider; zero when no cached usage was reported." },
+          "usageSource": { "type": "string", "enum": ["provider", "estimated"], "description": "Identifies whether token usage came from the model provider or an AtlasFlux estimate." },
           "searchCount": { "type": "integer" },
-          "costMicroMyr": { "type": "integer" },
+          "costMicroMyr": { "type": "integer", "description": "Settled cost in micro-MYR. Always zero when status is failed." },
           "latencyMs": { "type": "integer", "nullable": true },
           "createdAt": { "type": "string" }
         }

@@ -25,7 +25,7 @@ Add credit via the [Billing Dashboard](https://platform.atlasflux.my/dashboard/b
 1. **Reservation** — Before execution, AtlasFlux estimates the cost and reserves it from your balance
 2. **Execution** — The request is processed by the selected model
 3. **Settlement** — Actual cost is charged; excess reservation is released
-4. **If request fails** — Unused reservation is released; search or content work already completed may still be charged
+4. **If request fails** — The complete reservation is released and the request cost is `RM0.000000`, including requests that already attempted search or content extraction
 
 ### Cost components
 
@@ -48,7 +48,17 @@ Set `max_total_cost_myr` to impose a hard maximum for one request. AtlasFlux est
 
 ### Unit system
 
-All internal values use **micro-MYR** (1 RM = 1,000,000 micro-MYR). The API returns costs as MYR strings for display.
+All internal values use **micro-MYR** (1 RM = 1,000,000 micro-MYR). Per-request API costs are returned as MYR strings with six decimal places, such as `"0.000431"`. Wallet and ledger calculations retain the underlying integer micro-MYR value; a small request is not rounded down to zero.
+
+### Cached input tokens
+
+`cached_tokens` is populated only from token usage reported by the model provider. AtlasFlux does not estimate a positive cached-token count. A value of `0` means the provider did not report cached input for that request.
+
+Cached tokens are included in the provider's total input-token count and are currently billed at the standard AtlasFlux input-token rate. The cached count is exposed separately for observability; it does not currently apply a customer billing discount.
+
+### Failed requests
+
+A request recorded with status `failed` has `costMicroMyr: 0` and does not deduct wallet credit. Any temporary reservation is released in full. A successful response remains billable even when its finish reason is a normal model limit such as `length` or `cost_cap`.
 
 ### Insufficient balance
 
@@ -80,3 +90,5 @@ Every request is logged with:
 - Public model and customer-facing routing category
 
 View usage in the [Dashboard](https://platform.atlasflux.my/dashboard/overview).
+
+The Logs dashboard displays individual request costs to six decimal places. Use the **Refresh** action on Overview, Usage, Logs, or Billing to fetch current server data; refreshing Usage preserves the active filters.

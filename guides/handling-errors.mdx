@@ -72,6 +72,10 @@ async function callAtlasFlux(input, attempt = 0) {
 
 Context errors include measured token counts when AtlasFlux can calculate them. Reduce the conversation history, remove unnecessary content, or lower `max_output_tokens`; increasing the output limit does not fix a context overflow.
 
+## Billing on failed requests
+
+Requests recorded with status `failed` are not charged. AtlasFlux releases the complete temporary reservation and records the request cost as `RM0.000000`, including when search or content extraction was attempted before the failure. Use the error `request_id` to locate the matching zero-cost entry in Logs.
+
 ## Streaming errors
 
 Streaming requests can fail after the HTTP connection has already returned `200`. Always handle the stream error event and stop processing further output. See [Streaming responses](/guides/streaming-responses) for event examples.

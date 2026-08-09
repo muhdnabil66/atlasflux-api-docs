@@ -41,7 +41,7 @@ Both endpoints accept similar parameters:
     "reasoning_tokens": 0,
     "cached_tokens": 0,
     "total_tokens": 60,
-    "cost_myr": "0.00",
+    "cost_myr": "0.001260",
     "latency_ms": 1234
   },
   "routing": {
@@ -71,11 +71,16 @@ Both endpoints accept similar parameters:
   "usage": {
     "prompt_tokens": 12,
     "completion_tokens": 48,
-    "total_tokens": 60
+    "reasoning_tokens": 0,
+    "cached_tokens": 0,
+    "total_tokens": 60,
+    "cost_myr": "0.001260"
   }
 }
 ```
 
 ## Cost display
 
-All costs are returned as strings in MYR (Malaysian Ringgit). The `cost_myr` field shows the total cost for the request.
+All costs are returned as strings in MYR (Malaysian Ringgit). The `cost_myr` field shows the settled request cost with six decimal places. For example, `"0.000431"` means RM0.000431, not RM0.00.
+
+`cached_tokens` is a provider-reported subset of input usage. It is shown separately for observability and is billed at the standard input-token rate. Failed requests return an error instead of a completion response and are recorded with zero cost.
