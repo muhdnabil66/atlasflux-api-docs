@@ -14,11 +14,13 @@ description: "Before going live with AtlasFlux API."
 ### Billing
 - [ ] Wallet funded with sufficient balance
 - [ ] Monthly spend limits set per key if needed
+- [ ] Account-wide monthly spend limit configured if needed
+- [ ] `max_total_cost_myr` set for workloads that require a per-request hard cap
 - [ ] Usage monitoring configured in Dashboard
 - [ ] Alert thresholds for low balance
 
 ### Error handling
-- [ ] Retry logic with exponential backoff for 429/500/503
+- [ ] Retry logic with exponential backoff for retryable 429/500/502/503/504 responses
 - [ ] Rate limit headers respected
 - [ ] Idempotency keys used for non-streaming requests
 - [ ] Graceful degradation when model is unavailable

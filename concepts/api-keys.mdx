@@ -41,12 +41,8 @@ The prefix is visible in the Dashboard and in request logs:
 - **View** — See all keys in the Dashboard (prefix only, not full key)
 - **Rename** — Change the key name
 - **Revoke** — Immediately invalidate a key
-- **Delete** — Permanently remove a key
-
-<Warning>
-Deleted keys cannot be recovered. Revoke instead if you might need the key again later.
-</Warning>
+- **Revoke all** — Immediately invalidate every active key for the account
 
 ## Spending limits
 
-You can set a monthly spend limit per key. When the limit is reached, requests using that key receive a `402` response.
+You can set a monthly spend limit per key and an account-wide monthly limit in the Dashboard. AtlasFlux checks the estimated reservation before execution. A request that would exceed either limit receives a `402 spend_limit_exceeded` response.

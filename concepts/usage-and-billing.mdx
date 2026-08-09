@@ -25,7 +25,7 @@ Add credit via the [Billing Dashboard](https://platform.atlasflux.my/dashboard/b
 1. **Reservation** — Before execution, AtlasFlux estimates the cost and reserves it from your balance
 2. **Execution** — The request is processed by the selected model
 3. **Settlement** — Actual cost is charged; excess reservation is released
-4. **If request fails** — The full reservation is released back to your balance
+4. **If request fails** — Unused reservation is released; search or content work already completed may still be charged
 
 ### Cost components
 
@@ -38,7 +38,13 @@ Add credit via the [Billing Dashboard](https://platform.atlasflux.my/dashboard/b
 | Web search (balanced) | RM 0.06 / search |
 | Web search (deep) | RM 0.08 / search |
 | Web search (reasoning) | RM 0.10 / search |
+| Results 11-20 | +RM 0.05 / search |
+| Results 21-25 | +RM 0.13 / search |
 | Content extraction | RM 0.01 / page |
+
+### Per-request cost cap
+
+Set `max_total_cost_myr` to impose a hard maximum for one request. AtlasFlux estimates the maximum cost before execution. If the configured output, search, and content limits could exceed your cap, the request is rejected with `spend_limit_exceeded` before model execution. Reduce `max_output_tokens`, search limits, or content pages, or raise the cap.
 
 ### Unit system
 
@@ -71,6 +77,6 @@ Every request is logged with:
 - Cost in micro-MYR
 - Latency
 - Routing category
-- Upstream model used
+- Public model and customer-facing routing category
 
 View usage in the [Dashboard](https://platform.atlasflux.my/dashboard/overview).

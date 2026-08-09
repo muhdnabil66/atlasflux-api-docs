@@ -471,7 +471,7 @@
           },
           "web_search": { "$ref": "#/components/schemas/WebSearchConfig" },
           "max_output_tokens": { "type": "integer", "minimum": 1, "maximum": 32000 },
-          "max_total_cost_myr": { "type": "number", "description": "Maximum total cost in MYR." },
+          "max_total_cost_myr": { "type": "number", "minimum": 0, "exclusiveMinimum": true, "description": "Hard per-request cost cap in MYR. Requests whose estimated maximum exceeds this value are rejected before execution." },
           "stream": { "type": "boolean", "default": false }
         }
       },
@@ -489,7 +489,8 @@
           "max_tokens": { "type": "integer", "minimum": 1, "maximum": 32000 },
           "stream": { "type": "boolean", "default": false },
           "reasoning": { "$ref": "#/components/schemas/ReasoningConfig" },
-          "web_search": { "$ref": "#/components/schemas/WebSearchConfig" }
+          "web_search": { "$ref": "#/components/schemas/WebSearchConfig" },
+          "max_total_cost_myr": { "type": "number", "minimum": 0, "exclusiveMinimum": true, "description": "Hard per-request cost cap in MYR. Requests whose estimated maximum exceeds this value are rejected before execution." }
         }
       },
       "ChatMessage": {
@@ -583,7 +584,7 @@
         "type": "object",
         "properties": {
           "category": { "type": "string", "description": "Routing category used (general, reasoning, etc.)." },
-          "upstream_model": { "type": "string", "example": "atlasflux/nenas-flash", "description": "Internal model used (not exposed to users)." },
+          "upstream_model": { "type": "string", "example": "atlasflux/nenas-flash", "description": "AtlasFlux public model identifier for the selected route." },
           "reasoning": { "type": "string" }
         }
       },

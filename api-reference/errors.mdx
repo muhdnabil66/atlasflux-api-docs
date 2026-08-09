@@ -44,7 +44,7 @@ Always record `request_id` when reporting an issue to AtlasFlux support. Do not 
 | Code | HTTP | Message | Guidance |
 |------|------|---------|----------|
 | `insufficient_balance` | 402 | Your AtlasFlux balance is insufficient to complete this request. | Add credits at the [Billing dashboard](https://platform.atlasflux.my/dashboard/billing), then retry. |
-| `spend_limit_exceeded` | 402 | This request would exceed an AtlasFlux spending limit. | Review the API key or account spending limit and balance. |
+| `spend_limit_exceeded` | 402 | The message identifies either the monthly limit or the per-request cost cap that would be exceeded. | Reduce request limits or adjust the applicable AtlasFlux spending limit. |
 | `billing_error` | 400 | AtlasFlux billing could not complete this operation. | Review billing settings and try again later if needed. |
 
 ### Request and model validation
@@ -60,6 +60,8 @@ When token counts are available, the context error includes the measured and max
 ```text
 Your request requires approximately 65,732 tokens, but this AtlasFlux model supports a maximum of 64,391 tokens.
 ```
+
+When `max_total_cost_myr` is too low for the configured request, the error also reports the estimated maximum and requested cap, then identifies which output or search settings to reduce.
 
 ### Rate limits
 

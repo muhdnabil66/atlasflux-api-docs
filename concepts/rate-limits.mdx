@@ -5,10 +5,12 @@ description: "Request rate limits per API key."
 
 ## Rate limit tiers
 
-| Key Environment | Requests per Minute | Burst |
-|----------------|-------------------|-------|
-| Test (`af_test_`) | 20 | 40 |
-| Live (`af_live_`) | 60 | 120 |
+| Key Environment | Requests per Minute |
+|----------------|---------------------|
+| Test (`af_test_`) | 20 |
+| Live (`af_live_`) | 60 |
+
+Generation keys are also protected against excessive concurrent requests. A concurrency rejection uses the same `429 rate_limit_exceeded` response and is safe to retry after an active request completes.
 
 ## Rate limit headers
 
