@@ -1,67 +1,95 @@
 ---
 title: "Errors Reference"
-description: "Complete catalog of error codes and responses."
+description: "Complete catalog of AtlasFlux error codes, guidance, and retry behavior."
 ---
 
 ## Error response format
 
+AtlasFlux returns errors as JSON. The `type` and `error.code` fields are intended for programmatic handling; messages and guidance are written for developers and may evolve.
+
 ```json
 {
+  "type": "error",
   "error": {
-    "message": "Human-readable error message",
-    "type": "error_category",
-    "code": "specific_error_code",
-    "param": "field_name_or_null",
-    "request_id": "req_abc123"
+    "message": "Your AtlasFlux balance is insufficient to complete this request.",
+    "type": "billing_error",
+    "code": "insufficient_balance",
+    "param": null,
+    "request_id": "req_abc123",
+    "guidance": "Add credits to your AtlasFlux balance, then retry the request.",
+    "action_url": "https://platform.atlasflux.my/dashboard/billing",
+    "retryable": false
   }
 }
 ```
 
-## Error codes
+`retry_after_seconds` is included when the API provides a specific retry interval, such as for rate limits.
 
-### Authentication Errors (401)
+Always record `request_id` when reporting an issue to AtlasFlux support. Do not match on the full message string.
 
-| Code | HTTP | Message | Cause |
-|------|------|---------|-------|
-| `authentication_error` | 401 | Missing Authorization header | No Bearer token provided |
-| `authentication_error` | 401 | Malformed Authorization header | Invalid header format |
-| `authentication_error` | 401 | Invalid or expired Clerk token | Dashboard auth failed |
-| `invalid_api_key` | 401 | API key not found | Wrong key or typo |
-| `expired_api_key` | 401 | API key expired | Key past expiration date |
-| `revoked_api_key` | 403 | API key revoked | Key was manually revoked |
+## Error catalog
 
-### Billing Errors (402)
+### Authentication and access
 
-| Code | HTTP | Message | Cause |
-|------|------|---------|-------|
-| `insufficient_balance` | 402 | Insufficient balance | Wallet balance too low |
-| `spend_limit_exceeded` | 402 | Monthly spend limit exceeded | Per-key limit reached |
+| Code | HTTP | Message | Guidance |
+|------|------|---------|----------|
+| `authentication_error` | 401 | AtlasFlux could not authenticate this request. | Check the Authorization header and make sure the AtlasFlux API key or session is valid. |
+| `invalid_api_key` | 401 | The AtlasFlux API key is invalid. | Check the key and its status in the [API Keys dashboard](https://platform.atlasflux.my/dashboard/api-keys). |
+| `expired_api_key` | 401 | This AtlasFlux API key has expired. | Create a new API key and update your application. |
+| `revoked_api_key` | 403 | This AtlasFlux API key has been revoked. | Create a new API key and replace the revoked key. |
+| `permission_denied` | 403 | This AtlasFlux API key is not allowed to perform this operation. | Check the key permissions and required access. |
 
-### Request Errors (400)
+### Billing
 
-| Code | HTTP | Message | Cause |
-|------|------|---------|-------|
-| `invalid_request` | 400 | Validation error | Request body doesn't match schema |
-| `context_length_exceeded` | 400 | Context too long | Input exceeds model's context window |
-| `unsupported_input` | 400 | Unsupported content type | Image/document not supported by model |
+| Code | HTTP | Message | Guidance |
+|------|------|---------|----------|
+| `insufficient_balance` | 402 | Your AtlasFlux balance is insufficient to complete this request. | Add credits at the [Billing dashboard](https://platform.atlasflux.my/dashboard/billing), then retry. |
+| `spend_limit_exceeded` | 402 | This request would exceed an AtlasFlux spending limit. | Review the API key or account spending limit and balance. |
+| `billing_error` | 400 | AtlasFlux billing could not complete this operation. | Review billing settings and try again later if needed. |
 
-### Rate Limit (429)
+### Request and model validation
 
-| Code | HTTP | Message | Cause |
-|------|------|---------|-------|
-| `rate_limit_exceeded` | 429 | Rate limit exceeded | Too many requests per minute |
+| Code | HTTP | Message | Guidance |
+|------|------|---------|----------|
+| `invalid_request` | 400 | The message depends on the invalid field or request body. | Review the request body, required fields, and parameter values. |
+| `context_length_exceeded` | 400 | Your request exceeds the context limit for this AtlasFlux model. | Reduce conversation history, remove unnecessary content, or lower the requested output limit. |
+| `unsupported_input` | 400 | AtlasFlux does not support one or more inputs in this request. | Review the endpoint/model documentation and remove or change the unsupported input. |
 
-### Server Errors (500+)
+When token counts are available, the context error includes the measured and maximum values:
 
-| Code | HTTP | Message | Cause |
-|------|------|---------|-------|
-| `provider_unavailable` | 503 | All models failed | All model attempts failed |
-| `provider_timeout` | 504 | Model timed out | Model took too long |
-| `search_error` | 502 | Search failed | Search provider error |
-| `internal_error` | 500 | Internal server error | Unexpected error |
+```text
+Your request requires approximately 65,732 tokens, but this AtlasFlux model supports a maximum of 64,391 tokens.
+```
 
-### Conflict (409)
+### Rate limits
 
-| Code | HTTP | Message | Cause |
-|------|------|---------|-------|
-| `idempotency_conflict` | 409 | Different payload for same key | Idempotency key reused with different body |
+| Code | HTTP | Message | Guidance |
+|------|------|---------|----------|
+| `rate_limit_exceeded` | 429 | AtlasFlux request rate limit exceeded. | Wait for the retry interval and use the `Retry-After` header when available. |
+
+### Temporary processing errors
+
+| Code | HTTP | Message | Guidance |
+|------|------|---------|----------|
+| `provider_unavailable` | 502/503 | AtlasFlux is temporarily unable to process this request. | Retry with exponential backoff and include the request ID when contacting support. |
+| `provider_timeout` | 504 | AtlasFlux timed out while processing this request. | Retry, reduce request size, or use streaming for longer responses. |
+| `search_error` | 502 | AtlasFlux web search could not be completed. | Retry later or disable web search and submit the request again. |
+
+### Conflicts and server errors
+
+| Code | HTTP | Message | Guidance |
+|------|------|---------|----------|
+| `idempotency_conflict` | 409 | This idempotency key was already used with a different request payload. | Use a new key or resend the original payload unchanged. |
+| `not_implemented` | 501 | This AtlasFlux capability is not available yet. | Check the API documentation for supported capabilities. |
+| `internal_error` | 500 | AtlasFlux could not complete the request due to an internal error. | Retry with exponential backoff and contact support with the request ID if it persists. |
+
+## Retry behavior
+
+| Status | Retry | Action |
+|--------|-------|--------|
+| 400, 401, 403, 409 | No | Fix the request, API key, permission, or idempotency key. |
+| 402 | No | Add credits or adjust the applicable spending limit. |
+| 413 | No | Reduce the request body. |
+| 429 | Yes | Wait for `Retry-After` or `retry_after_seconds`, then retry. |
+| 502, 503, 504 | Yes | Retry with exponential backoff. |
+| 500 | Conditional | Retry only when `retryable` is `true`. |

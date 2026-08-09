@@ -22,6 +22,13 @@ data: {"id":"chatcmpl_...","object":"chat.completion.chunk","choices":[],"usage"
 data: [DONE]
 ```
 
+If a chat stream fails after it has started, the stream emits a structured error before `[DONE]`:
+
+```
+data: {"type":"error","error":{"type":"provider_error","code":"provider_timeout","message":"AtlasFlux timed out while processing this request.","param":null,"request_id":"req_...","guidance":"Retry the request, reduce its size, or use streaming for longer responses.","action_url":null,"retryable":true}}
+data: [DONE]
+```
+
 ## Responses streaming
 
 Uses AtlasFlux-specific event types:
@@ -38,6 +45,9 @@ data: {"inputTokens":12,"outputTokens":48,"costMicroMyr":50000}
 
 event: response.completed
 data: {}
+
+event: response.failed
+data: {"error":{"type":"error","error":{"type":"server_error","code":"internal_error","message":"AtlasFlux could not complete the request due to an internal error.","param":null,"request_id":"req_...","guidance":"Retry with exponential backoff and contact AtlasFlux support with the request ID if it persists.","action_url":null,"retryable":true}},"request_id":"req_..."}
 ```
 
 ## Implementation tips
@@ -46,4 +56,5 @@ data: {}
 - Handle `event:` and `data:` fields separately
 - Accumulate text deltas for the full response
 - Handle connection drops gracefully with retry logic
+- Handle `response.failed` and structured stream errors before closing the stream
 - The final event contains usage and cost information

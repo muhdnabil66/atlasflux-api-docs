@@ -24,10 +24,10 @@ For API issues, include:
 A: Use the [Dashboard Overview](https://platform.atlasflux.my/dashboard/overview) or call `GET /dashboard/billing/balance`.
 
 **Q: How do I add credit?**
-A: Use the [Billing Dashboard](https://platform.atlasflux.my/dashboard/billing) to top up via Stripe.
+A: Use the [Billing Dashboard](https://platform.atlasflux.my/dashboard/billing) to add AtlasFlux credits.
 
 **Q: Can I get a refund?**
 A: Contact support through the Dashboard.
 
 **Q: What happens if my balance runs out?**
-A: Requests return `402 Insufficient Balance`. Top up to continue.
+A: Requests return `402 insufficient_balance` with a billing action URL and guidance. Add credits to continue.

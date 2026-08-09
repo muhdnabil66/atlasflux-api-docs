@@ -1,73 +1,77 @@
 ---
 title: "Handling Errors"
-description: "Error handling patterns and common error codes."
+description: "Handle AtlasFlux errors safely with structured codes, guidance, and retry metadata."
 ---
 
 ## Error response format
 
-All errors follow a consistent format:
+Every public API error includes a stable code, a human-readable message, actionable guidance, and a request ID:
 
 ```json
 {
+  "type": "error",
   "error": {
-    "message": "Description of what went wrong",
-    "type": "error_type",
-    "code": "specific_error_code",
+    "message": "AtlasFlux request rate limit exceeded.",
+    "type": "rate_limit_error",
+    "code": "rate_limit_exceeded",
     "param": null,
-    "request_id": "req_..."
+    "request_id": "req_abc123",
+    "guidance": "Wait for the retry interval, then send the request again. Use the Retry-After header when available.",
+    "action_url": null,
+    "retryable": true,
+    "retry_after_seconds": 12
   }
 }
 ```
 
-## Common errors
+Handle `error.code` rather than matching the complete message. Store the `request_id` in logs and include it when contacting AtlasFlux support.
 
-| HTTP Status | Code | Cause | Solution |
-|------------|------|-------|----------|
-| 400 | `invalid_request` | Malformed request body | Check request schema |
-| 400 | `context_length_exceeded` | Input too long for model | Reduce input or increase `max_output_tokens` |
-| 401 | `invalid_api_key` | Missing or invalid API key | Check your key and header format |
-| 401 | `expired_api_key` | Key has expired | Create a new key |
-| 402 | `insufficient_balance` | Wallet balance too low | Top up your wallet |
-| 402 | `spend_limit_exceeded` | Monthly key limit reached | Increase limit or wait |
-| 403 | `revoked_api_key` | Key has been revoked | Create a new key |
-| 429 | `rate_limit_exceeded` | Too many requests | Wait and retry |
-| 500 | `internal_error` | Server error | Retry with backoff |
-| 503 | `provider_unavailable` | All models failed | Retry later |
-| 504 | `provider_timeout` | Provider took too long | Retry with backoff |
+## Retry policy
 
-## Error handling pattern
+- Do not retry 400, 401, 403, or 409 errors until the request, key, permission, or idempotency key is fixed.
+- Do not automatically retry 402 errors; add credits or adjust the spending limit first.
+- For 429, wait for `retry_after_seconds` or the `Retry-After` response header.
+- Retry 502, 503, and 504 with exponential backoff and a maximum retry count.
+- Retry a 500 response only when `error.retryable` is `true`.
+
+## JavaScript example
 
 ```javascript
-async function callAtlasFlux(input) {
-  try {
-    const res = await fetch("https://api.atlasflux.my/v1/responses", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.ATLASFLUX_API_KEY}`,
-      },
-      body: JSON.stringify({ input }),
-    });
+async function callAtlasFlux(input, attempt = 0) {
+  const res = await fetch("https://api.atlasflux.my/v1/responses", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.ATLASFLUX_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: "atlasflux/nenas-flash",
+      input,
+      max_output_tokens: 1024,
+    }),
+  });
 
-    if (!res.ok) {
-      const err = await res.json();
-      console.error(`Error ${res.status}: ${err.error.message}`);
+  if (res.ok) return res.json();
 
-      if (res.status === 429) {
-        // Rate limited — wait and retry
-        const reset = res.headers.get("x-ratelimit-reset");
-        const waitMs = (Number(reset) * 1000) - Date.now();
-        if (waitMs > 0) await new Promise(r => setTimeout(r, waitMs));
-        return callAtlasFlux(input);
-      }
+  const body = await res.json();
+  const error = body.error;
+  const retryAfter = error.retry_after_seconds ?? Number(res.headers.get("retry-after") ?? 0);
+  const canRetry = error.retryable && attempt < 3;
 
-      throw new Error(err.error.message);
-    }
-
-    return await res.json();
-  } catch (error) {
-    console.error("Request failed:", error.message);
-    throw error;
+  if (canRetry) {
+    const delayMs = retryAfter > 0 ? retryAfter * 1000 : 2 ** attempt * 500;
+    await new Promise((resolve) => setTimeout(resolve, delayMs));
+    return callAtlasFlux(input, attempt + 1);
   }
+
+  throw new Error(`${error.message} Request ID: ${error.request_id}`);
 }
 ```
+
+## Context-limit errors
+
+Context errors include measured token counts when AtlasFlux can calculate them. Reduce the conversation history, remove unnecessary content, or lower `max_output_tokens`; increasing the output limit does not fix a context overflow.
+
+## Streaming errors
+
+Streaming requests can fail after the HTTP connection has already returned `200`. Always handle the stream error event and stop processing further output. See [Streaming responses](/guides/streaming-responses) for event examples.

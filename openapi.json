@@ -64,9 +64,14 @@
           "400": { "$ref": "#/components/responses/BadRequest" },
           "401": { "$ref": "#/components/responses/Unauthorized" },
           "402": { "$ref": "#/components/responses/InsufficientBalance" },
+          "403": { "$ref": "#/components/responses/PermissionDenied" },
+          "409": { "$ref": "#/components/responses/Conflict" },
+          "413": { "$ref": "#/components/responses/RequestTooLarge" },
           "429": { "$ref": "#/components/responses/RateLimited" },
+          "502": { "$ref": "#/components/responses/TemporaryProcessingError" },
           "500": { "$ref": "#/components/responses/InternalError" },
-          "503": { "$ref": "#/components/responses/ProviderUnavailable" }
+          "503": { "$ref": "#/components/responses/TemporaryProcessingError" },
+          "504": { "$ref": "#/components/responses/TemporaryProcessingError" }
         }
       }
     },
@@ -105,9 +110,14 @@
           "400": { "$ref": "#/components/responses/BadRequest" },
           "401": { "$ref": "#/components/responses/Unauthorized" },
           "402": { "$ref": "#/components/responses/InsufficientBalance" },
+          "403": { "$ref": "#/components/responses/PermissionDenied" },
+          "409": { "$ref": "#/components/responses/Conflict" },
+          "413": { "$ref": "#/components/responses/RequestTooLarge" },
           "429": { "$ref": "#/components/responses/RateLimited" },
+          "502": { "$ref": "#/components/responses/TemporaryProcessingError" },
           "500": { "$ref": "#/components/responses/InternalError" },
-          "503": { "$ref": "#/components/responses/ProviderUnavailable" }
+          "503": { "$ref": "#/components/responses/TemporaryProcessingError" },
+          "504": { "$ref": "#/components/responses/TemporaryProcessingError" }
         }
       }
     },
@@ -785,15 +795,44 @@
       },
       "ErrorResponse": {
         "type": "object",
+        "required": ["type", "error"],
         "properties": {
+          "type": { "type": "string", "enum": ["error"] },
           "error": {
             "type": "object",
+            "required": ["message", "type", "code", "param", "request_id", "guidance", "action_url", "retryable"],
             "properties": {
               "message": { "type": "string" },
               "type": { "type": "string" },
-              "code": { "type": "string" },
+              "code": {
+                "type": "string",
+                "enum": [
+                  "invalid_request",
+                  "authentication_error",
+                  "invalid_api_key",
+                  "expired_api_key",
+                  "revoked_api_key",
+                  "permission_denied",
+                  "insufficient_balance",
+                  "spend_limit_exceeded",
+                  "rate_limit_exceeded",
+                  "context_length_exceeded",
+                  "unsupported_input",
+                  "provider_unavailable",
+                  "provider_timeout",
+                  "search_error",
+                  "billing_error",
+                  "idempotency_conflict",
+                  "not_implemented",
+                  "internal_error"
+                ]
+              },
               "param": { "type": "string", "nullable": true },
-              "request_id": { "type": "string" }
+              "request_id": { "type": "string" },
+              "guidance": { "type": "string" },
+              "action_url": { "type": "string", "format": "uri", "nullable": true },
+              "retryable": { "type": "boolean" },
+              "retry_after_seconds": { "type": "integer", "minimum": 0 }
             }
           }
         }
@@ -806,6 +845,18 @@
       },
       "Unauthorized": {
         "description": "Missing or invalid API key.",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+      },
+      "PermissionDenied": {
+        "description": "The API key is not permitted to perform the operation.",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+      },
+      "Conflict": {
+        "description": "The request conflicts with a previous request or resource state.",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+      },
+      "RequestTooLarge": {
+        "description": "The request body is too large.",
         "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
       },
       "InsufficientBalance": {
@@ -825,7 +876,11 @@
         "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
       },
       "ProviderUnavailable": {
-        "description": "Upstream provider unavailable.",
+        "description": "AtlasFlux is temporarily unable to process the request.",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+      },
+      "TemporaryProcessingError": {
+        "description": "AtlasFlux could not temporarily process the request. Retry according to the error guidance.",
         "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
       }
     }

@@ -50,9 +50,16 @@ If your wallet balance is insufficient, the request returns:
 
 ```json
 {
+  "type": "error",
   "error": {
-    "message": "Insufficient balance.",
-    "code": "insufficient_balance"
+    "message": "Your AtlasFlux balance is insufficient to complete this request.",
+    "type": "billing_error",
+    "code": "insufficient_balance",
+    "param": null,
+    "request_id": "req_abc123",
+    "guidance": "Add credits to your AtlasFlux balance, then retry the request.",
+    "action_url": "https://platform.atlasflux.my/dashboard/billing",
+    "retryable": false
   }
 }
 ```

@@ -71,6 +71,7 @@
       },
       {
         "group": "API Reference",
+        "openapi": "openapi.json",
         "pages": [
           "api-reference/overview",
           "api-reference/authentication",
@@ -88,7 +89,6 @@
       }
     ]
   },
-  "openapi": "openapi.json",
   "icons": {
     "library": "fontawesome"
   },

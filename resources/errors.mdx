@@ -1,63 +1,47 @@
 ---
 title: "Error Catalog"
-description: "Quick reference for all error codes and how to resolve them."
+description: "Quick reference for AtlasFlux error codes and resolution guidance."
 ---
 
 ## Error format
 
 ```json
 {
+  "type": "error",
   "error": {
-    "message": "Human-readable description",
-    "type": "error_category",
-    "code": "specific_code",
+    "message": "Your AtlasFlux balance is insufficient to complete this request.",
+    "type": "billing_error",
+    "code": "insufficient_balance",
     "param": null,
-    "request_id": "req_abc123"
+    "request_id": "req_abc123",
+    "guidance": "Add credits to your AtlasFlux balance, then retry the request.",
+    "action_url": "https://platform.atlasflux.my/dashboard/billing",
+    "retryable": false
   }
 }
 ```
 
-## Quick resolution guide
+Use `error.code` for application logic. Messages and guidance are for display and may be refined over time. Keep the `request_id` for support requests.
 
-<AccordionGroup>
+| Code | Status | Resolution |
+|------|--------|------------|
+| `invalid_request` | 400 | Review the request body and parameter values. |
+| `authentication_error` | 401 | Check the Authorization header and API key/session. |
+| `invalid_api_key` | 401 | Check the key in the [API Keys dashboard](https://platform.atlasflux.my/dashboard/api-keys). |
+| `expired_api_key` | 401 | Create a new API key. |
+| `revoked_api_key` | 403 | Replace the revoked API key. |
+| `permission_denied` | 403 | Use a key with the required permission. |
+| `insufficient_balance` | 402 | Add credits in the [Billing dashboard](https://platform.atlasflux.my/dashboard/billing). |
+| `spend_limit_exceeded` | 402 | Review the API key or account spending limit. |
+| `billing_error` | 400 | Review billing settings and retry later if needed. |
+| `context_length_exceeded` | 400 | Reduce input/history or lower the output limit. |
+| `unsupported_input` | 400 | Remove or change the unsupported input. |
+| `rate_limit_exceeded` | 429 | Wait for the retry interval and retry. |
+| `provider_unavailable` | 502/503 | Retry with exponential backoff. |
+| `provider_timeout` | 504 | Retry, reduce request size, or use streaming. |
+| `search_error` | 502 | Retry later or disable web search. |
+| `idempotency_conflict` | 409 | Use a new key or resend the original payload. |
+| `not_implemented` | 501 | Check currently supported capabilities. |
+| `internal_error` | 500 | Retry if `retryable` is true; otherwise contact support with the request ID. |
 
-<Accordion title="401 — Authentication errors">
-
-| Error | Resolution |
-|-------|-----------|
-| `invalid_api_key` | Check your API key format: `af_live_...` or `af_test_...` |
-| `expired_api_key` | Create a new key in the Dashboard |
-| `revoked_api_key` | Key was revoked. Create a new one. |
-| Missing header | Add `Authorization: Bearer <key>` header |
-
-</Accordion>
-
-<Accordion title="402 — Billing errors">
-
-| Error | Resolution |
-|-------|-----------|
-| `insufficient_balance` | Top up your wallet in the Dashboard |
-| `spend_limit_exceeded` | Increase or remove your key's monthly spend limit |
-
-</Accordion>
-
-<Accordion title="429 — Rate limit">
-
-| Error | Resolution |
-|-------|-----------|
-| `rate_limit_exceeded` | Wait for `x-ratelimit-reset` header value, then retry |
-
-</Accordion>
-
-<Accordion title="500+ — Server errors">
-
-| Error | Resolution |
-|-------|-----------|
-| `provider_unavailable` | Retry with backoff. If persistent, contact support. |
-| `provider_timeout` | Retry with backoff. Consider increasing `max_output_tokens`. |
-| `search_error` | Retry or disable web search for this request. |
-| `internal_error` | Retry with exponential backoff. |
-
-</Accordion>
-
-</AccordionGroup>
+For the full message catalog and retry matrix, see [Errors Reference](/api-reference/errors).

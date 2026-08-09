@@ -26,10 +26,17 @@ When the rate limit is exceeded, the API returns:
 
 ```json
 {
+  "type": "error",
   "error": {
-    "message": "Rate limit exceeded.",
+    "message": "AtlasFlux request rate limit exceeded.",
     "type": "rate_limit_error",
-    "code": "rate_limit_exceeded"
+    "code": "rate_limit_exceeded",
+    "param": null,
+    "request_id": "req_abc123",
+    "guidance": "Wait for the retry interval, then send the request again. Use the Retry-After header when available.",
+    "action_url": null,
+    "retryable": true,
+    "retry_after_seconds": 12
   }
 }
 ```
