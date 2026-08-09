@@ -18,7 +18,7 @@ Both endpoints accept similar parameters:
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `model` | string | Model identifier (default: `atlasflux/nenas-flash`) |
+| `model` | string | Model identifier. Currently only `atlasflux/nenas-flash` is accepted. |
 | `input` / `messages` | string / array | Your prompt or message array |
 | `max_output_tokens` | integer | Maximum tokens to generate (1–32,000) |
 | `temperature` | float | Sampling temperature (0–2) |
@@ -34,6 +34,7 @@ Both endpoints accept similar parameters:
 {
   "id": "resp_arq_...",
   "object": "response",
+  "finish_reason": "stop",
   "output_text": "The response text...",
   "usage": {
     "input_tokens": 12,
@@ -73,9 +74,9 @@ Both endpoints accept similar parameters:
     "completion_tokens": 48,
     "reasoning_tokens": 0,
     "cached_tokens": 0,
-    "total_tokens": 60,
-    "cost_myr": "0.001260"
-  }
+    "total_tokens": 60
+  },
+  "cost_myr": "0.001260"
 }
 ```
 
@@ -84,3 +85,5 @@ Both endpoints accept similar parameters:
 All costs are returned as strings in MYR (Malaysian Ringgit). The `cost_myr` field shows the settled request cost with six decimal places. For example, `"0.000431"` means RM0.000431, not RM0.00.
 
 `cached_tokens` is a provider-reported subset of input usage. It is shown separately for observability and is billed at the standard input-token rate. Failed requests return an error instead of a completion response and are recorded with zero cost.
+
+`output_tokens` (or Chat Completions `completion_tokens`) counts visible generated tokens and excludes `reasoning_tokens`; `total_tokens` adds input, visible output, and reasoning exactly once. A `finish_reason` of `length` means the generated-token limit was reached and the response may be incomplete.

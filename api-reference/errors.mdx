@@ -51,7 +51,7 @@ Always record `request_id` when reporting an issue to AtlasFlux support. Do not 
 
 | Code | HTTP | Message | Guidance |
 |------|------|---------|----------|
-| `invalid_request` | 400 | The message depends on the invalid field or request body. | Review the request body, required fields, and parameter values. |
+| `invalid_request` | 400 | AtlasFlux identifies the invalid field or unsupported model in the message. | Review the request body, required fields, and parameter values. |
 | `context_length_exceeded` | 400 | Your request exceeds the context limit for this AtlasFlux model. | Reduce conversation history, remove unnecessary content, or lower the requested output limit. |
 | `unsupported_input` | 400 | AtlasFlux does not support one or more inputs in this request. | Review the endpoint/model documentation and remove or change the unsupported input. |
 
@@ -60,6 +60,8 @@ When token counts are available, the context error includes the measured and max
 ```text
 Your request requires approximately 65,732 tokens, but this AtlasFlux model supports a maximum of 64,391 tokens.
 ```
+
+An unsupported `model` is rejected before model execution and therefore is not charged. Generation endpoints return HTTP 400; `GET /v1/models/{model}` returns HTTP 404 when that catalog entry does not exist. Use `GET /v1/models` to discover accepted identifiers.
 
 When `max_total_cost_myr` is too low for the configured request, the error also reports the estimated maximum and requested cap, then identifies which output or search settings to reduce.
 

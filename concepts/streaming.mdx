@@ -18,9 +18,12 @@ Uses OpenAI-compatible SSE format:
 ```
 data: {"id":"chatcmpl_...","object":"chat.completion.chunk","choices":[{"delta":{"content":"Hello"}}]}
 data: {"id":"chatcmpl_...","object":"chat.completion.chunk","choices":[{"delta":{"content":" world"}}]}
-data: {"id":"chatcmpl_...","object":"chat.completion.chunk","choices":[],"usage":{"prompt_tokens":12,"completion_tokens":2}}
+data: {"id":"chatcmpl_...","object":"chat.completion.chunk","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+data: {"id":"chatcmpl_...","object":"chat.completion.chunk","choices":[],"usage":{"prompt_tokens":12,"completion_tokens":2,"reasoning_tokens":0,"cached_tokens":0,"total_tokens":14},"cost_myr":"0.000110"}
 data: [DONE]
 ```
+
+The terminal choice chunk always reports why generation ended through `finish_reason`. The following usage chunk reports settled cost as a six-decimal MYR string and separates visible completion tokens from reasoning tokens.
 
 If a chat stream fails after it has started, the stream emits a structured error before `[DONE]`:
 
@@ -41,10 +44,10 @@ event: response.output_text.delta
 data: {"delta":"The response text..."}
 
 event: response.usage
-data: {"inputTokens":12,"outputTokens":48,"costMicroMyr":50000}
+data: {"usage":{"inputTokens":12,"outputTokens":48,"reasoningTokens":0,"cachedTokens":0,"costMicroMyr":1260},"request_id":"arq_..."}
 
 event: response.completed
-data: {}
+data: {"request_id":"arq_...","finish_reason":"stop"}
 
 event: response.failed
 data: {"error":{"type":"error","error":{"type":"server_error","code":"internal_error","message":"AtlasFlux could not complete the request due to an internal error.","param":null,"request_id":"req_...","guidance":"Retry with exponential backoff and contact AtlasFlux support with the request ID if it persists.","action_url":null,"retryable":true}},"request_id":"req_..."}
@@ -55,6 +58,7 @@ data: {"error":{"type":"error","error":{"type":"server_error","code":"internal_e
 - Parse SSE events line by line
 - Handle `event:` and `data:` fields separately
 - Accumulate text deltas for the full response
+- Inspect `finish_reason`; `length` means the configured output-token limit was reached
 - Handle connection drops gracefully with retry logic
 - Handle `response.failed` and structured stream errors before closing the stream
 - The final event contains usage and cost information
