@@ -46,6 +46,7 @@
     "pages": [
       "introduction",
       "quickstart",
+      "sdks",
       {
         "group": "Core Concepts",
         "pages": [

@@ -1,0 +1,291 @@
+---
+title: "AtlasFlux JavaScript and TypeScript SDK"
+description: "Install and use the official @atlasflux/sdk package for the AtlasFlux developer API."
+---
+
+## Overview
+
+AtlasFlux provides an official `@atlasflux/sdk` package for server-side JavaScript and TypeScript applications. The package requires Node.js 18 or later and provides typed clients for the Responses API, Chat Completions, models, streaming, retries, and structured API errors.
+
+The SDK uses the same API key and base URL as the [AtlasFlux API](/api-reference/overview). It does not provide clients for dashboard, billing, or webhook endpoints.
+
+<Warning>
+  Keep your API key on the server. Never expose it in browser JavaScript, mobile apps, or other client-side code.
+</Warning>
+
+<Card title="View @atlasflux/sdk on npm" icon="box" href="https://www.npmjs.com/package/@atlasflux/sdk">
+  Install the latest published version and view package release information.
+</Card>
+
+## Install
+
+```bash
+npm install @atlasflux/sdk
+```
+
+## Quick start
+
+Set your API key in the environment before starting your application:
+
+```bash
+export ATLASFLUX_API_KEY="af_live_YOUR_KEY_HERE"
+```
+
+Create a client and call the Responses API:
+
+```typescript
+import { AtlasFlux } from "@atlasflux/sdk";
+
+const apiKey = process.env.ATLASFLUX_API_KEY;
+if (!apiKey) throw new Error("ATLASFLUX_API_KEY is required");
+
+const client = new AtlasFlux({ apiKey });
+
+const response = await client.responses.create({
+  model: "atlasflux/nenas-flash",
+  input: "Explain APIs in one paragraph.",
+  max_output_tokens: 256
+});
+
+console.log(response.output_text);
+```
+
+The SDK automatically sends `Authorization: Bearer <api-key>` and uses `https://api.atlasflux.my` by default.
+
+## Client configuration
+
+```typescript
+const client = new AtlasFlux({
+  apiKey: process.env.ATLASFLUX_API_KEY!,
+  baseURL: "https://api.atlasflux.my",
+  timeoutMs: 60_000,
+  maxRetries: 2,
+  defaultHeaders: {
+    "X-Application-Name": "my-app"
+  }
+});
+```
+
+| Option | Required | Default | Description |
+|--------|----------|---------|-------------|
+| `apiKey` | Yes | - | AtlasFlux `af_live_` or `af_test_` API key. |
+| `baseURL` | No | `https://api.atlasflux.my` | API origin. Trailing slashes are removed automatically. |
+| `timeoutMs` | No | `60000` | Request timeout in milliseconds. |
+| `maxRetries` | No | `2` | Maximum retries for eligible non-streaming requests. |
+| `fetch` | No | Global `fetch` | Custom fetch implementation for testing or a custom runtime. |
+| `defaultHeaders` | No | `{}` | Headers added to every request. |
+
+## Responses API
+
+Use `client.responses.create()` for the native AtlasFlux response format:
+
+```typescript
+const response = await client.responses.create({
+  model: "atlasflux/nenas-flash",
+  input: "Summarize the benefits of an API gateway.",
+  instructions: "Answer for a senior developer.",
+  reasoning: { effort: "medium" },
+  web_search: {
+    mode: "auto",
+    search_depth: "fast",
+    max_results: 5
+  },
+  max_output_tokens: 512,
+  max_total_cost_myr: 1
+});
+```
+
+The `model` is optional. When omitted, AtlasFlux uses its default public model. The `input` can be a string, an array of strings, or an array of typed input messages.
+
+### Responses parameters
+
+| Parameter | Description |
+|-----------|-------------|
+| `model` | Optional model identifier. The public model is `atlasflux/nenas-flash`. |
+| `input` | Required prompt or input message array. |
+| `instructions` | Optional higher-level instructions for the request. |
+| `reasoning` | Set `effort` to `low`, `medium`, or `high`. |
+| `web_search` | Configure search mode, depth, result limits, and page content extraction. |
+| `max_output_tokens` | Maximum visible output tokens. |
+| `max_total_cost_myr` | Hard per-request cost cap in MYR. |
+| `tools` | Function tool definitions. |
+| `tool_choice` | Tool selection behavior. |
+| `text` | Text or JSON Schema output format. |
+
+See [request and response formats](/concepts/requests-and-responses) and the [API Reference](/api-reference/overview) for field limits and response schemas.
+
+## Chat Completions
+
+Use `client.chat.completions.create()` for the OpenAI-compatible format:
+
+```typescript
+const completion = await client.chat.completions.create({
+  model: "atlasflux/nenas-flash",
+  messages: [
+    { role: "system", content: "You are a concise assistant." },
+    { role: "user", content: "What is the capital of Malaysia?" }
+  ],
+  temperature: 0.7,
+  max_tokens: 256,
+  reasoning_effort: "low"
+});
+
+console.log(completion.choices[0]?.message.content);
+```
+
+### Chat Completions parameters
+
+| Parameter | Description |
+|-----------|-------------|
+| `model` | Optional model identifier. The public model is `atlasflux/nenas-flash`. |
+| `messages` | Required conversation messages. |
+| `max_tokens` | Maximum visible completion tokens. |
+| `max_completion_tokens` | Alternative maximum completion-token limit. |
+| `temperature` | Sampling temperature from `0` to `2`. |
+| `top_p` | Nucleus sampling value. |
+| `reasoning` | Set `effort` to `low`, `medium`, or `high`. |
+| `reasoning_effort` | OpenAI-compatible reasoning effort shortcut. |
+| `web_search` | Configure web search for the request. |
+| `max_total_cost_myr` | Hard per-request cost cap in MYR. |
+| `tools` | Function tool definitions. |
+| `tool_choice` | Tool selection behavior. |
+| `response_format` | JSON, JSON Schema, or text response format. |
+
+## Streaming
+
+The SDK exposes async generators for both API formats. Streaming calls return events with an `event` name and `data` payload.
+
+### Responses streaming
+
+```typescript
+for await (const event of client.responses.stream({
+  input: "Write a short story.",
+  max_output_tokens: 512
+})) {
+  if (event.event === "response.output_text.delta") {
+    const data = event.data as { delta?: string };
+    process.stdout.write(data.delta ?? "");
+  }
+
+  if (event.event === "response.failed") {
+    console.error("AtlasFlux stream failed", event.data);
+  }
+}
+```
+
+Responses streams use AtlasFlux event names such as `response.created`, `response.output_text.delta`, `response.usage`, `response.completed`, and `response.failed`. See [Responses streaming](/concepts/streaming#responses-streaming) for the event format.
+
+### Chat Completions streaming
+
+```typescript
+for await (const event of client.chat.completions.stream({
+  messages: [{ role: "user", content: "Tell me a short story." }],
+  max_tokens: 512
+})) {
+  if (event.data === "[DONE]") continue;
+
+  const data = event.data as {
+    choices?: Array<{ delta?: { content?: string | null } }>;
+  };
+  const content = data.choices?.[0]?.delta?.content;
+  if (content) process.stdout.write(content);
+}
+```
+
+Chat streams use the OpenAI-compatible chunk format. A stream error may arrive after the HTTP response has started, so inspect event payloads and handle structured errors before finishing. See [Chat Completions streaming](/concepts/streaming#chat-completions-streaming).
+
+<Note>
+  Streaming methods are not automatically retried. Reconnect only when your application can safely resume or repeat the request.
+</Note>
+
+## Models
+
+List available models or retrieve one by identifier:
+
+```typescript
+const models = await client.models.list();
+console.log(models.data);
+
+const model = await client.models.get("atlasflux/nenas-flash");
+console.log(model.capabilities);
+```
+
+The SDK currently covers these developer API endpoints:
+
+| SDK method | HTTP endpoint |
+|------------|---------------|
+| `client.responses.create()` | `POST /v1/responses` |
+| `client.responses.stream()` | `POST /v1/responses` |
+| `client.chat.completions.create()` | `POST /v1/chat/completions` |
+| `client.chat.completions.stream()` | `POST /v1/chat/completions` |
+| `client.models.list()` | `GET /v1/models` |
+| `client.models.get(model)` | `GET /v1/models/{model}` |
+
+The SDK does not cover dashboard, billing checkout, or Stripe webhook routes. Use the [API Reference](/api-reference/overview) for those endpoints.
+
+## Request options and retries
+
+Pass request-specific options as the second argument to `create()` or `stream()`:
+
+```typescript
+const response = await client.responses.create(
+  { input: "Generate a report." },
+  {
+    timeoutMs: 30_000,
+    maxRetries: 3,
+    idempotencyKey: "report-job-123",
+    headers: { "X-Trace-ID": "trace-123" }
+  }
+);
+```
+
+| Option | Description |
+|--------|-------------|
+| `signal` | Abort the request with an `AbortSignal`. |
+| `timeoutMs` | Override the client timeout for this request. |
+| `maxRetries` | Override the client retry count for this request. |
+| `idempotencyKey` | Add an `Idempotency-Key` header and make a non-streaming POST eligible for retry. |
+| `allowUnsafeRetries` | Allow non-streaming POST retries without an idempotency key. Use only when repeating the request is safe. |
+| `headers` | Add or override headers for this request. |
+
+For non-streaming requests, the SDK retries retryable API errors and network failures. `GET` requests can be retried automatically. `POST` requests are retried only when an `idempotencyKey` is supplied, unless `allowUnsafeRetries` is enabled. The SDK honors `retry_after_seconds` and the `Retry-After` header before falling back to exponential backoff.
+
+See [error handling](/guides/handling-errors) for the API retry policy and [rate limits](/concepts/rate-limits) for idempotency guidance.
+
+## Errors
+
+The SDK exports `AtlasFluxError` for API responses and `AtlasFluxNetworkError` for connection or transport failures:
+
+```typescript
+import {
+  AtlasFlux,
+  AtlasFluxError,
+  AtlasFluxNetworkError
+} from "@atlasflux/sdk";
+
+try {
+  await client.responses.create({ input: "Hello" });
+} catch (error: unknown) {
+  if (error instanceof AtlasFluxError) {
+    console.error(error.status, error.code, error.message);
+    console.error(error.requestId, error.guidance);
+    console.error(error.retryable, error.retryAfterSeconds);
+  } else if (error instanceof AtlasFluxNetworkError) {
+    console.error("Network failure", error.cause);
+  }
+  throw error;
+}
+```
+
+`AtlasFluxError` includes `status`, `type`, `code`, `param`, `requestId`, `guidance`, `actionUrl`, `retryable`, and `retryAfterSeconds`. Match on `code`, not the complete message. Streaming failures that arrive after the connection starts are emitted as stream events instead of being thrown as an initial HTTP error.
+
+See the [complete error catalog](/api-reference/errors).
+
+## Related documentation
+
+- [Authentication](/authentication) - Create, store, and rotate API keys
+- [Quickstart](/quickstart) - Make a first API call without an SDK
+- [Text generation](/guides/text-generation) - Configure prompts and output
+- [Streaming responses](/guides/streaming-responses) - Work with SSE directly
+- [Models](/concepts/models) - Review capabilities and routing
+- [API Reference](/api-reference/overview) - Full endpoint and parameter reference
