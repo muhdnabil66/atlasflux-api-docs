@@ -32,6 +32,11 @@
       "type": "link",
       "label": "Status",
       "url": "https://status.atlasflux.my"
+    },
+    {
+      "type": "link",
+      "label": "Help Center",
+      "url": "https://support.atlasflux.my"
     }
   ],
   "footerSocials": {
